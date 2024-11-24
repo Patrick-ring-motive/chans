@@ -10,12 +10,12 @@ func Deref[T any](ptr *T) (T, error) {
 	var x T
 	var err error
 	if ptr == nil {
-		return x, fmt.Errorf("Deref on nil pointer: %v %v", ptr, x)
+		return x, fmt.Errorf("[dereference on nil pointer] %v %v", ptr, x)
 	}
 	(func() {
 		defer func() {
 			if r := recover(); r != nil {
-				err = fmt.Errorf("Deref panic: %v %v %v", r, ptr, x)
+				err = fmt.Errorf("[dereference panic] %v %v %v", r, ptr, x)
 			}
 		}()
 		x = *ptr
@@ -27,18 +27,18 @@ func Deref[T any](ptr *T) (T, error) {
 // closed channels, or if sending causes a panic.
 func Send[T any, C ~chan T](ch C, value T) error {
 	if ch == nil {
-		return fmt.Errorf("Send on nil channel: %v %v", ch, value)
+		return fmt.Errorf("[send on nil channel] channel(%v) value(%v)", ch, value)
 	}
 	var err error
 	(func() {
 		defer func() {
 			if r := recover(); r != nil {
-				err = fmt.Errorf("Send panic: %v %v %v", r, ch, value)
+				err = fmt.Errorf("[channel send panic] %v channel(%v) value(%v)", r, ch, value)
 			}
 		}()
 		c := (chan T)(ch)
 		if c == nil {
-			err = fmt.Errorf("Send on nil channel: %v %v", ch, value)
+			err = fmt.Errorf("[send on nil channel] channel(%v) value(%v)", ch, value)
 			return
 		}
 		c <- value
@@ -52,23 +52,23 @@ func Receive[T any, C ~chan T](ch C) (T, error) {
 	var result T
 	ok := true
 	if ch == nil {
-		return result, fmt.Errorf("Receive on nil channel: %v %v", ch, result)
+		return result, fmt.Errorf("[receive on nil channel] channel(%v) result(%v)", ch, result)
 	}
 	var err error
 	(func() {
 		defer func() {
 			if r := recover(); r != nil {
-				err = fmt.Errorf("Receive panic: %v %v %v", r, ch, result)
+				err = fmt.Errorf("[channel receive panic] %v channel(%v) result(%v)", r, ch, result)
 			}
 		}()
 		c := (chan T)(ch)
 		if c == nil {
-			err = fmt.Errorf("Receive on nil channel: %v %v", ch, result)
+			err = fmt.Errorf("[receive on nil channel] channel(%v) result(%v)", ch, result)
 			return
 		}
 		result, ok = <-c
 		if !ok {
-			err = fmt.Errorf("Receive on closed channel: %v %v", ch, result)
+			err = fmt.Errorf("[receive on closed channel] channel(%v) result(%v)", ch, result)
 		}
 	})()
 	return result, err
@@ -78,18 +78,18 @@ func Receive[T any, C ~chan T](ch C) (T, error) {
 // already-closed channels, or if closing causes a panic.
 func Close[T any, C ~chan T](ch C) error {
 	if ch == nil {
-		return fmt.Errorf("Close on nil channel: %v", ch)
+		return fmt.Errorf("[close on nil channel] channel(%v)", ch)
 	}
 	var err error
 	(func() {
 		defer func() {
 			if r := recover(); r != nil {
-				err = fmt.Errorf("Close panic: %v %v", r, ch)
+				err = fmt.Errorf("[channel close panic] %v channel(%v)", r, ch)
 			}
 		}()
 		c := (chan T)(ch)
 		if c == nil {
-			err = fmt.Errorf("Close on nil channel: %v", ch)
+			err = fmt.Errorf("[close on nil channel] channel(%v)", ch)
 			return
 		}
 		close(c)
